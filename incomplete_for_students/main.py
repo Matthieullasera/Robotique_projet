@@ -256,8 +256,8 @@ class SimpleRobotControl:
         )
 
         # TODO
-        local_speed = distance * 0.30# linear_speed
-        local_turn = m.theta_goal*0.3  # rotation_speed
+        local_speed = distance*0.3# linear_speed
+        local_turn = math.atan(m.y_goal/m.x_goal)   # rotation_speed
 
         m1_speed, m2_speed = m.ik(local_speed, local_turn)
         m.m1.speed = m1_speed
