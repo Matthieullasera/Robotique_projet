@@ -1,6 +1,6 @@
-import sys
-import motor
 import math
+
+import motor
 from constants import *
 
 
@@ -51,8 +51,8 @@ class Model(object):
             float -- Speed of motor1 (m/s), speech of motor2 (m/s)
         """
         # TODO
-        m1_speed = linear_speed + (L / 2) * rotational_speed   # dp = linear_speed , dtheta = rotational_spped
-        m2_speed = linear_speed - (L / 2) * rotational_speed
+        m1_speed = linear_speed - (L / 2) * rotational_speed  # dp = linear_speed , dtheta = rotational_speed
+        m2_speed = linear_speed + (L / 2) * rotational_speed
 
         return m1_speed, m2_speed
 
@@ -68,8 +68,9 @@ class Model(object):
             float -- linear speed (m/s), rotational speed (rad/s)
         """
         # TODO
-        linear_speed = (m1_speed + m2_speed) / 2
-        rotation_speed = (m1_speed - m2_speed) / L
+        linear_speed = (self.m1.speed + self.m2.speed) / 2
+        rotation_speed = (self.m1.speed - self.m2.speed) / L
+
         return linear_speed, rotation_speed
 
     def update(self, dt):
@@ -81,15 +82,20 @@ class Model(object):
             dt {float} -- Travel time in seconds
         """
         # Going from wheel speeds to robot speed
-        linear_speed, rotation_speed = self.dk(self.m1.speed, self.m2.speed)
-
+        linear_speed, rotation_speed = self.dk()
+        dp = linear_speed * dt
+        dtheta = rotation_speed * dt
         # TODO
-        dx = (linear_speed / rotation_speed) * math.sin(rotation_speed)
-        dy = (linear_speed / rotation_speed) * (1 - math.cos(rotation_speed))
-        x_m = dx * math.cos(self.theta)- dy * math.sin(self.theta)
+        if rotation_speed != 0:
+            dx = (dp / dtheta) * math.sin(dtheta)
+            dy = (dp / dtheta) * (1 - math.cos(dtheta))
+        else:
+            dx = dp
+            dy = 0
+        x_m = dx * math.cos(self.theta) - dy * math.sin(self.theta)
         y_m = dx * math.sin(self.theta) + dy * math.cos(self.theta)
 
         # Updating the robot position
         self.x = self.x + x_m  # TODO
         self.y = self.y + y_m  # TODO
-        self.theta = self.theta + self.theta_goal  # TODO
+        self.theta = self.theta + dtheta  # TODO
